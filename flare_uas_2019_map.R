@@ -25,7 +25,7 @@ library(maps)
 library(maptools)
 library(ggsn)
 
-register_google(key = "AIzaSyCmmdl7DjKfreahP00kPJ-ybRz6FeeXsDw")
+# note need a google API key for qmap
 t <- get_map('texas', zoom = 6, maptype = 'satellite')
 qmap(location =  , zoom = 14, maptype = "satellite")
 
