@@ -11,6 +11,8 @@ rm(list=ls())
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(rgeos)
+library(gpclib)
 library(DT)
 library(sf)
 library(ggmap) # devtools::install_github("dkahle/ggmap")
@@ -26,16 +28,14 @@ library(maptools)
 library(ggsn)
 
 # note need a google API key for qmap
-t <- get_map('texas', zoom = 6, maptype = 'satellite')
-qmap(location =  , zoom = 14, maptype = "satellite")
+# t <- get_map('texas', zoom = 6, maptype = 'satellite')
+# qmap(location =  , zoom = 14, maptype = "satellite")
 
 # get a background map based roughly on the bounding box for the sampling points
 # this should be giving google satellite imagery, but it is not...
 c <- get_map(c(left = 160.2, bottom = 67.7, right = 162.7, top = 68.9),
-             maptype = "satellite", zoom = 10, source = "google", force = T)
-
-# was thinking about using Logan's biomass background - not a great background though
-#bio <- raster("/Volumes/data/data_repo/gis_data/Berner_2011_Kolyma_fire_biomass/kolyma_landsat5_larch_AGB_gm2_2007.tif")
+             maptype = "watercolor", zoom = 3, source = "osm", force = TRUE,
+             filename = "/Volumes/data/data_repo/gis_data/cherskiy_area_features/kolyma_terrain_base")
 
 # read in all of the coordinates of ground control points
 sc <- read.csv("/Volumes/data/projects/vege_burn_siberia_2019/flight_info/gcp_coordinates.csv",
@@ -48,15 +48,20 @@ b <- sc[which(sc$tr_loc==0),]
 # mapp using ggmap, which has ggplot2 syntax, I think
 ggmap(c) +
   geom_point(data = b, aes(x = lon, y = lat, color = site), size = 3, position = "jitter") +
-  #geom_point(aes(x = 161.399713, y = 68.739907, color = "orange"), shape = 8, size = 5) +
+  geom_point(aes(x = 161.399713, y = 68.739907), shape = 8, size = 5, , color = "orange", show.legend = F) +
   #geom_label_repel(aes(x = 161.399713, y = 68.739907, label = "Northeast Science Station", vjust = "bottom", hjust = "left", color = "black")) +
   theme(legend.position = "bottom", #specify theme aspects including font/text and legend location 
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         legend.title = element_blank(),
         text = element_text(face = "plain", color = "black", size = 16)) +
-  scale_color_manual(values = c("black", "red", "blue", "yellow")) +
-  ggsn::scalebar(c,location = "bottomright", dist = 100, dist_unit ="km", transform = T)
+  scale_color_manual(values = c("black", "red", "blue", "purple", "orange")) +
+  ggsn::scalebar(location = "bottomleft", dist = 10, dist_unit ="km", 
+                 st.bottom = F,anchor = c(x = 160.3, y = 67.75),
+                 transform = T, model = "WGS84",
+              #   nudge_x = 0.2, nudge_y = 0.2,
+                 x.min = 160.2,x.max = 162.7,
+                 y.min = 67.7, y.max = 68.9)
 
 # not sure why the scale bar isn't working
   annotation_scale(location = "br", width_hint = 0.25, text_size = 12, text_face = NULL, text_family = "serif", text_col = "black") 
