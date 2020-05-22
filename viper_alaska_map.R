@@ -40,8 +40,8 @@ bg <- get_map(c(left = -170, bottom = 51, right = -135, top = 72),
              maptype = "terrain", zoom = 7, source = "osm", force = TRUE)
 
 #read viper point data, omit west dock since this site was not sampled. 
-site <- read.csv("/Volumes/GoogleDrive/My Drive/Documents/research/NSF_VIPER_2015-18/borehole_data/viper_stations_15_16/site_info.csv",
-                 header = T)[-13,]
+site <- read.csv("/Volumes/GoogleDrive/My Drive/Documents/research/NSF_VIPER_2015-18/borehole_data/viper_stations_15_16/fr_site_info.csv",
+                 header = T)
 # longitude values should be negative because we are in the western hemisphere
 site$Long <- -site$Long
 
@@ -49,11 +49,13 @@ site$Long <- -site$Long
 sc <- st_as_sf(site, coords = c("Long", "Lat"),crs = 4326)
  
 # create the map
-ggplot() +
+ggplot(site) +
   geom_sf(data = ak, fill = "gray75", color = "black") +
   #geom_point(data = site, aes(x = Long, y = Lat, color = Biome), shape = 16, position = "jitter") +
-  geom_point(data = site, aes(x = Long, y = Lat, color = Biome), shape = 16, size = 2, position = "jitter") +
-  geom_text_repel(data = site, aes(x = Long, y = Lat, label = Site.Number), size = 2.5, position = "jitter") +
+  geom_point(data = site, aes(x = Long, y = Lat, color = Biome), shape = 16, size = 2) +
+  geom_text_repel(data = site, aes(x = Long, y = Lat, label = Site.Number), size = 2.5,position = "jitter", 
+                  point.padding=0.25, force = 0.5, max.iter = 100000) +
+  #geom_text(site,aes(Long, Lat, label = Site.Number)) +
   theme(legend.position = "bottom", #specify theme aspects including font/text and legend location 
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
@@ -77,6 +79,13 @@ ggsave("/Volumes/GoogleDrive/My Drive/Documents/research/manuscripts/mcculloch_r
 #       plot = fig_manuscript2, 
        width = 8, height = 8, dpi = 600)
 
+## version plotting the numbers only. 
+ggplot(site) + 
+  geom_sf(data = ak, fill = "gray75", color = "black") +
+  geom_text(aes(x = Long, y = Lat, label = Site.Number, color = Biome), size = 2.5) +
+  scale_color_manual(values = c("black", "red"))  #manually set the colors
+  
+  
 ## version using ggmap
 ggmap(bg) +
   geom_point(data = site, aes(x = Long, y = Lat, color = Biome), shape = 20, size = 3, position = "jitter") +
